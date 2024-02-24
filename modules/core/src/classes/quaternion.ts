@@ -1,9 +1,9 @@
 // Copyright (c) 2017 Uber Technologies, Inc.
 // MIT License
-import {NumericArray} from '@math.gl/types';
-import {MathArray} from './base/math-array';
-import {checkNumber, checkVector} from '../lib/validators';
-import {Vector4} from './vector4';
+import { NumericArray } from '@math.gl/types';
+import { MathArray } from './base/math-array';
+import { checkNumber, checkVector } from '../lib/validators';
+import { Vector4 } from './vector4';
 // @ts-ignore gl-matrix types...
 import {
   fromMat3 as quat_fromMat3,
@@ -27,7 +27,8 @@ import {
   slerp as quat_slerp
 } from '../gl-matrix/quat';
 // @ts-ignore gl-matrix types...
-import {transformQuat as vec4_transformQuat} from '../gl-matrix/vec4';
+import { transformQuat as vec4_transformQuat } from '../gl-matrix/vec4';
+import { Euler } from './euler';
 
 const IDENTITY_QUATERNION = [0, 0, 0, 1] as const;
 
@@ -59,7 +60,7 @@ export class Quaternion extends MathArray {
     return this.check();
   }
 
-  fromObject(object: {x: number; y: number; z: number; w: number}): this {
+  fromObject(object: { x: number; y: number; z: number; w: number }): this {
     this[0] = object.x;
     this[1] = object.y;
     this[2] = object.z;
@@ -77,6 +78,31 @@ export class Quaternion extends MathArray {
   fromMatrix3(m: Readonly<NumericArray>): this {
     quat_fromMat3(this, m);
     return this.check();
+  }
+
+  /**
+   * Creates a quaternion from the given Euler.
+   * @param m
+   * @returns
+   */
+  fromEuler(euler: Euler): this {
+    this.identity();
+    switch (euler.order) {
+      case Euler.XYZ:
+        return this.rotateX(this[0]).rotateY(this[1]).rotateZ(this[2]);
+      case Euler.YXZ:
+        return this.rotateY(this[0]).rotateX(this[1]).rotateZ(this[2]);
+      case Euler.ZXY:
+        return this.rotateZ(this[0]).rotateX(this[1]).rotateY(this[2]);
+      case Euler.ZYX:
+        return this.rotateZ(this[0]).rotateY(this[1]).rotateX(this[2]);
+      case Euler.YZX:
+        return this.rotateY(this[0]).rotateZ(this[1]).rotateX(this[2]);
+      case Euler.XZY:
+        return this.rotateX(this[0]).rotateZ(this[1]).rotateY(this[2]);
+      default:
+        throw new Error('Unknown Euler angle order');
+    }
   }
 
   fromAxisRotation(axis: Readonly<NumericArray>, rad: number): this {
@@ -280,10 +306,10 @@ export class Quaternion extends MathArray {
     arg0:
       | Readonly<NumericArray>
       | {
-          start: Readonly<NumericArray>;
-          target: Readonly<NumericArray>;
-          ratio: number;
-        },
+        start: Readonly<NumericArray>;
+        target: Readonly<NumericArray>;
+        ratio: number;
+      },
     arg1?: Readonly<NumericArray> | number,
     arg2?: number
   ): this {
