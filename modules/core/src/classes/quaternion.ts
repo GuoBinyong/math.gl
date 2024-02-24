@@ -82,7 +82,7 @@ export class Quaternion extends MathArray {
 
   /**
    * Creates a quaternion from the given Euler.
-   * @param m
+   * @param euler
    * @returns
    */
   fromEuler(euler: Euler): this {
